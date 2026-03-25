@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column,String, Integer, Boolean, Float, ForeignKey
-from sqlalchemy.orm import declarative_base
-
+from sqlalchemy.orm import declarative_base, relationship
 
 # Creating connection with Data Base
 db = create_engine("sqlite:///banco.db")
@@ -34,7 +33,7 @@ class User(Base):
 
 
 #Class of Orders
-class Order(Base):
+class  Order(Base):
     """
     Creates the table for orders in DataBase
     Variable Status has specified values (PENDENT,CANCELED AND FINISHED), the DataBase will accept only this 3 String Values.
@@ -47,11 +46,19 @@ class Order(Base):
     status = Column("status", String) #Pendent, Canceled, Finished
     user =  Column("user", ForeignKey("users.id"))
     price = Column("price", Float)
+    items = relationship("ItemOrdered", cascade="all, delete")
     #items =
     def __init__(self, user, status="PENDENT", price=0):
         self.user = user
         self.status = status
         self.price = price
+
+    def calculate_price(self):
+        order_price = 0
+        for item in self.items:
+            item_price = item.unit_price * item.amount
+            order_price += item_price
+        self.price = order_price
 
 
 #Items Ordered
