@@ -9,19 +9,11 @@ from models import Order, User, ItemOrdered
 order_router = APIRouter(prefix="/orders", tags=["orders"], dependencies=[Depends(verify_token)]) #Create a route for ordering
 
 
-@order_router.get("/")
-async def orders():
-    """
-    This is the Standart route of Order. Every orders routes needs authenticated users.
-    :return:
-    """
-    return {"mensage": "You accesed the standart order route"}
-
-
-@order_router.post("/order")
+@order_router.post("/")
 async def create_order(order_schema: OrderSchema, session: Session = Depends(create_session)):
     """
-    :return:
+    A Standart route to first of all create an order in the DataBase, only authenticated users can do this.
+    :return:Mensage with the Order ID
     """
     new_order = Order(user=order_schema.user)
     session.add(new_order)
@@ -31,7 +23,13 @@ async def create_order(order_schema: OrderSchema, session: Session = Depends(cre
 
 @order_router.post("/order/cancel/{id_order}")
 async def cancel_order(id_order: int, session: Session = Depends(create_session), user: User = Depends(verify_token)):
-   #If User is admin ou user.id == order.user
+    """
+    Route to cancel an order. Only the user owner of the order or the admin can do this.
+    :param id_order: Identification of order
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Message with the order id that was canceled successfully.
+    """
     order = session.query(Order).filter(Order.id==id_order).first()
     if not order:
         raise HTTPException(status_code=400, detail="Order not Found.")
@@ -39,14 +37,19 @@ async def cancel_order(id_order: int, session: Session = Depends(create_session)
         raise HTTPException(status_code=401, detail="You are not authorized to do this modification.")
     order.status = "CANCELED"
     session.commit()
-    return{
-        "mensage": f"Order number {order.id} canceled successfuly.",
-        "order": order
-    }
+    return {"mensage": f"Order number {order.id} canceled successfully.",
+            "order": order
+            }
 
 
 @order_router.get("/list")
 async def list_orders(session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route just to list every Order listed in DataBase, Only Users Admins can do it.
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Orders
+    """
     if not user.admin:
         raise HTTPException(status_code=401, detail="You are not allowed to do this.")
     else:
@@ -57,6 +60,14 @@ async def list_orders(session: Session = Depends(create_session), user: User = D
 
 @order_router.post("/order/add-item/{order_id}")
 async def add_item_order(order_id: int, item_order_schema: ItemOrderSchema, session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route to Add Items to the order. Only the User Owner of the Order and Users Admin can do it.
+    :param order_id: Receive the Order to add the item.
+    :param item_order_schema: Standard package of information about the item.
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Message with the item id and the price of the order
+    """
     order = session.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=400, detail="Order Not Found.")
@@ -75,6 +86,13 @@ async def add_item_order(order_id: int, item_order_schema: ItemOrderSchema, sess
 
 @order_router.post("/order/remove-item/{item_order_id}")
 async def remove_item_order(item_order_id: int, session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route to remove an Item of the Order.
+    :param item_order_id: Receive the item id that user wish to remove
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Message with the Items that keep in the order and the order complete.
+    """
     item_ordered = session.query(ItemOrdered).filter(ItemOrdered.id == item_order_id).first()
     order = session.query(Order).filter(Order.id==item_ordered.order).first()
     if not item_ordered:
@@ -93,6 +111,13 @@ async def remove_item_order(item_order_id: int, session: Session = Depends(creat
 
 @order_router.post("/order/finish/{id_order}")
 async def finish_order(id_order: int, session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route to finish the order. Only user owner of the order os Admin can do this.
+    :param id_order: order id to finish.
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Message with the order id that was finished and the order itself.
+    """
     order = session.query(Order).filter(Order.id==id_order).first()
     if not order:
         raise HTTPException(status_code=400, detail="Order not Found.")
@@ -107,6 +132,13 @@ async def finish_order(id_order: int, session: Session = Depends(create_session)
 
 @order_router.get("/order/{id_order}")
 async def inspect_order(id_order: int, session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route to inspect a determinate order.
+    :param id_order: order id to inspect.
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: Just the amount of items ordered and the order itself.
+    """
     order = session.query(Order).filter(Order.id == id_order).first()
     if not order:
         raise HTTPException(status_code=400, detail="Order not Found.")
@@ -120,5 +152,11 @@ async def inspect_order(id_order: int, session: Session = Depends(create_session
 
 @order_router.get("/list-user", response_model=ResponseOrderSchema)
 async def list_orders(session: Session = Depends(create_session), user: User = Depends(verify_token)):
+    """
+    Route to list all Orders of the user authenticated.
+    :param session: Open a connection with DataBase
+    :param user: Check if the user is authenticated
+    :return: All Orders
+    """
     orders = session.query(Order).filter(Order.user == user.id).all()
     return orders

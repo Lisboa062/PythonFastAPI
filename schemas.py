@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+"""
+This is all objects structures used in the program.
+"""
+
 class UserSchema(BaseModel):
     name: str
     email: str

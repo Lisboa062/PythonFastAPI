@@ -7,6 +7,10 @@ from jose import jwt, JWTError
 
 
 def create_session():
+    """
+    Function used to Open and Close a connection with DataBase.
+    :return: session of connection.
+    """
     try:
         sessions = sessionmaker(bind=db)  # Create a connection beetwen DataBase and the Router
         session = sessions()  # open 1 instance of this connection
@@ -16,6 +20,12 @@ def create_session():
 
 
 def verify_token(token: str = Depends(oauth2_schema), session: Session = Depends(create_session)):
+    """
+    Function to verify if the token sent is valid.
+    :param token: token sent to verify
+    :param session: Open a connection with DataBase
+    :return: The user that had de token verified.
+    """
     try:
         dic_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
         user_id = int(dic_info.get("sub"))
