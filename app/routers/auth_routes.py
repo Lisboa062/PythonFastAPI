@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
-from models import  User
-from dependencies import create_session, verify_token
-from schemas import UserSchema, LoginSchema
+from app.main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
+from app.models.models import  User
+from app.dependencies import create_session, verify_token
+from app.schemas.schemas import UserSchema, LoginSchema
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordRequestForm

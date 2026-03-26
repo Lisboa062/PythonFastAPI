@@ -3,9 +3,18 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.env
-.venv/
 
-# PyCharm
+# Environment
+.venv/
+.env
+
+# IDE
 .idea/
+.vscode/
 *.iml
+
+# Database
+*.db
+
+# Logs
+*.log

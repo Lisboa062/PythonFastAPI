@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker, Session
 
-from main import ALGORITHM, SECRET_KEY, oauth2_schema
-from models import db, User
+from app.main import ALGORITHM, SECRET_KEY, oauth2_schema
+from app.models.models import db, User
 from fastapi import Depends, HTTPException
 from jose import jwt, JWTError
 

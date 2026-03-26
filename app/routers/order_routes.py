@@ -1,9 +1,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from dependencies import create_session, verify_token
-from schemas import OrderSchema, ItemOrderSchema, ResponseOrderSchema
-from models import Order, User, ItemOrdered
+from app.dependencies import create_session, verify_token
+from app.schemas.schemas import OrderSchema, ItemOrderSchema, ResponseOrderSchema
+from app.models.models import Order, User, ItemOrdered
 
 
 order_router = APIRouter(prefix="/orders", tags=["orders"], dependencies=[Depends(verify_token)]) #Create a route for ordering
