@@ -44,12 +44,12 @@ class  Order(Base):
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     status = Column("status", String) #Pendent, Canceled, Finished
-    user =  Column("user", ForeignKey("users.id"))
+    user_id = Column("user_id", ForeignKey("users.id"))
     price = Column("price", Float)
     items = relationship("ItemOrdered", cascade="all, delete")
     #items =
-    def __init__(self, user, status="PENDENT", price=0):
-        self.user = user
+    def __init__(self, user_id, status="PENDENT", price=0):
+        self.user_id = user_id
         self.status = status
         self.price = price
 

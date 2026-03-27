@@ -1,5 +1,4 @@
 from sqlalchemy.orm import sessionmaker, Session
-
 from app.main import ALGORITHM, SECRET_KEY, oauth2_schema
 from app.models.models import db, User
 from fastapi import Depends, HTTPException
@@ -35,4 +34,28 @@ def verify_token(token: str = Depends(oauth2_schema), session: Session = Depends
     user = session.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid access.")
+    return user
+
+
+def get_current_user(token: str = Depends(oauth2_schema), session: Session = Depends(create_session)):
+    """
+    Check the id of the current user authenticated.
+    """
+    credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials.")
+
+    try:
+        dic_info = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+        user_id = dic_info.get("sub")
+
+        if user_id is None:
+            raise credentials_exception
+        
+    except JWTError:
+        raise credentials_exception
+    
+    user = session.query(User).filter(User.id == user_id).first()
+
+    if user is None:
+        raise credentials_exception
+    
     return user

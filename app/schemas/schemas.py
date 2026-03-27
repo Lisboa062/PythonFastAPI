@@ -16,8 +16,8 @@ class UserSchema(BaseModel):
         from_attributes = True
 
 
-class OrderSchema(BaseModel):
-    user: int
+class OrderCreate(BaseModel):
+    user_id: Optional[int] = None
 
     class Config:
         from_attributes = True
