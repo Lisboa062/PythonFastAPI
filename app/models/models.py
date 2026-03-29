@@ -1,20 +1,30 @@
-from sqlalchemy import create_engine, Column,String, Integer, Boolean, Float, ForeignKey
+from sqlalchemy import (
+    create_engine,
+    Column,
+    String,
+    Integer,
+    Boolean,
+    Float,
+    ForeignKey,
+)
 from sqlalchemy.orm import declarative_base, relationship
 
 # Creating connection with Data Base
 db = create_engine("sqlite:///banco.db")
 
-#creating the Base of the Data Base
+# creating the Base of the Data Base
 Base = declarative_base()
 
 # Creating the Classes/Tables of Data Base
 
-#Class of Users
+
+# Class of Users
 class User(Base):
     """
     Creates the tables for users in DataBase
     The variable id is automatically created based on the identification of the DataBase table
     """
+
     __tablename__ = "users"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -32,27 +42,31 @@ class User(Base):
         self.admin = admin
 
 
-#Class of Orders
-class  Order(Base):
+# Class of Orders
+class Order(Base):
     """
     Creates the table for orders in DataBase
     Variable Status has specified values (PENDENT,CANCELED AND FINISHED), the DataBase will accept only this 3 String Values.
     Variable ID automatically created Based on the identification of the DataBase table
     """
+
     __tablename__ = "orders"
 
-
     id = Column("id", Integer, primary_key=True, autoincrement=True)
-    status = Column("status", String) #Pendent, Canceled, Finished
+    status = Column("status", String)  # Pendent, Canceled, Finished
     user_id = Column("user_id", ForeignKey("users.id"))
     price = Column("price", Float)
     items = relationship("ItemOrdered", cascade="all, delete")
-    #items =
+
+    # items =
     def __init__(self, user_id, status="PENDENT", price=0):
         self.user_id = user_id
         self.status = status
         self.price = price
 
+    # (erick) a modelagem não é lugar de aplicar regras de negocio
+    # aqui deve existir apenas os campos do banco de dados e qualquer methodo aqui
+    # deve ser eclusivamente para a integridade dos dados jamais criação de dados aqui
     def calculate_price(self):
         order_price = 0
         for item in self.items:
@@ -61,7 +75,7 @@ class  Order(Base):
         self.price = order_price
 
 
-#Items Ordered
+# Items Ordered
 class ItemOrdered(Base):
     """
     Creates the table for Items Ordered in DataBase
