@@ -64,9 +64,7 @@ class Order(Base):
         self.status = status
         self.price = price
 
-    # (erick) a modelagem não é lugar de aplicar regras de negocio
-    # aqui deve existir apenas os campos do banco de dados e qualquer methodo aqui
-    # deve ser eclusivamente para a integridade dos dados jamais criação de dados aqui
+
     def calculate_price(self):
         order_price = 0
         for item in self.items:
