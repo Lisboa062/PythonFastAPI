@@ -64,29 +64,9 @@ async def create_account(user_schema: UserSchema, session=Depends(create_session
     :return: Message that the user was registered.
     """
 
-    # (erick) quando vc executa um raise ele para a execução da função, nesse
-    # caso o else nao é necessário pode retira-lo para deixar o codigo mais limpo
-
-    # user = session.query(User).filter(User.email == user_schema.email).first()
-    # if user:
-    #     raise HTTPException(status_code=400, detail="E-mail already used.")
-    # else:
-    #     crypt_password = bcrypt_context.hash(user_schema.password)
-    #     new_user = User(
-    #         user_schema.name,
-    #         user_schema.email,
-    #         crypt_password,
-    #         user_schema.active,
-    #         user_schema.admin,
-    #     )
-    #     session.add(new_user)
-    #     session.commit()
-    #     return {"mensage": f"user {user_schema.email} successfully registered."}
-
     user = session.query(User).filter(User.email == user_schema.email).first()
     if user:
         raise HTTPException(status_code=400, detail="E-mail already used.")
-
     crypt_password = bcrypt_context.hash(user_schema.password)
     new_user = User(
         user_schema.name,
@@ -100,6 +80,7 @@ async def create_account(user_schema: UserSchema, session=Depends(create_session
     return {"mensage": f"user {user_schema.email} successfully registered."}
 
 
+
 @auth_router.post("/login-form")
 async def login_form(
     formulary_data: OAuth2PasswordRequestForm = Depends(),
@@ -111,14 +92,6 @@ async def login_form(
     :param session: Open a connection with DataBase
     :return: create and return a token for the user to be authenticated.
     """
-    # user = authenticator_user(formulary_data.username, formulary_data.password, session)
-    # if not user:
-    #     raise HTTPException(
-    #         status_code=400, detail="User not found or invalid password."
-    #     )
-    # else:
-    #     access_token = create_token(user.id)
-    #     return {"access_token": access_token, "token_type": "Bearer"}
 
     user = authenticator_user(formulary_data.username, formulary_data.password, session)
     if not user:
@@ -138,19 +111,6 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
     :param session: Open a connection with DataBase
     :return: create and return tokens for the user keep authenticated.
     """
-    # user = authenticator_user(login_schema.email, login_schema.password, session)
-    # if not user:
-    #     raise HTTPException(
-    #         status_code=400, detail="User not found or invalid password."
-    #     )
-    # else:
-    #     access_token = create_token(user.id)
-    #     refresh_token = create_token(user.id, token_time=timedelta(days=7))
-    #     return {
-    #         "access_token": access_token,
-    #         "refresh_token": refresh_token,
-    #         "token_type": "Bearer",
-    #     }
 
     user = authenticator_user(login_schema.email, login_schema.password, session)
     if not user:
@@ -174,15 +134,6 @@ async def use_refresh_token(user: User = Depends(verify_token)):
     :param user: User to receive the token
     :return: access token
     """
-    # (erick) uma questão logica entre login e refresher token
-    # 1- o verify_token verifica o token ou o refresh_token, pois parece que é o token?
-    # 1.1 - se for so o token qual o sentido de ter o refresh_token?
-    # 1.2 - se vc não faz nenhuma comparação entre os tokens qual o sentido de ter o refresh_token?
 
-    # como deve ser a interação entre os tokens, o refresh_token referencia o
-    # token , por um id por exemplo, quando acessamos a rota de refresh_token
-    # recebemos o toke e o refresh_token, verificamos se o refresh referencia o token
-    # verificamos se o refresh esta valido e criamos um novo token
-    # para performance so criamos um novo refresh quando ele ja esta proximo de expirar ex: 1 dia antes
     access_token = create_token(user.id)
     return {"access_token": access_token, "token_type": "Bearer"}
