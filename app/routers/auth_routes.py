@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from app.core.security import bcrypt_context
 from app.models.models import User
-from app.dependencies import create_session, verify_token
+from app.dependencies import create_session, get_current_user
 from app.schemas.schemas import UserSchema, LoginSchema
-from jose import jwt, JWTError
+from app.services.auth_service import (authenticator_user, 
+                                       create_account_service)
+from jose import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -23,37 +25,8 @@ def create_token(user_id, token_time=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUT
     """
     expiration_date = datetime.now(timezone.utc) + token_time
     dic_info = {"sub": str(user_id), "exp": expiration_date}
-    encode_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
+    encode_jwt = jwt.encode(dic_info, SECRET_KEY, algorithm=ALGORITHM)
     return encode_jwt
-
-
-def authenticator_user(email, password, session):
-    """
-    Functin that verify if the email and password sent by the user exist in DataBase or if is correspondent to the email and cryptography password.
-    :param email: email to check
-    :param password: password to check
-    :param session: Open a connection with DataBase
-    :return: The user to log in.
-    """
-    user = session.query(User).filter(User.email == email).first()
-    if not user:
-        return False
-    elif not bcrypt_context.verify(password, user.password):
-        return False
-    else:
-        return user
-
-
-@auth_router.get("/")
-async def home():  # (erick) qual a logica de ter uma rota que não executa nenhuma ação?
-    """
-    This is the standard authenticator route.
-    :return:
-    """
-    return {
-        "mensage": "You accesed the standart route of authenticator",
-        "authenticator": False,
-    }
 
 
 @auth_router.post("/create_account")
@@ -65,20 +38,9 @@ async def create_account(user_schema: UserSchema, session=Depends(create_session
     :return: Message that the user was registered.
     """
 
-    user = session.query(User).filter(User.email == user_schema.email).first()
-    if user:
-        raise HTTPException(status_code=400, detail="E-mail already used.")
-    crypt_password = bcrypt_context.hash(user_schema.password)
-    new_user = User(
-        user_schema.name,
-        user_schema.email,
-        crypt_password,
-        user_schema.active,
-        user_schema.admin,
-    )
-    session.add(new_user)
-    session.commit()
-    return {"mensage": f"user {user_schema.email} successfully registered."}
+    new_user = create_account_service(user_schema=user_schema, session=session)
+
+    return {"message": f"user {new_user.email} successfully registered."}
 
 
 
@@ -94,7 +56,8 @@ async def login_form(
     :return: create and return a token for the user to be authenticated.
     """
 
-    user = authenticator_user(formulary_data.username, formulary_data.password, session)
+    user = authenticator_user(email=formulary_data.username, password=formulary_data.password, session=session)
+
     if not user:
         raise HTTPException(
             status_code=400, detail="User not found or invalid password."
@@ -113,7 +76,8 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
     :return: create and return tokens for the user keep authenticated.
     """
 
-    user = authenticator_user(login_schema.email, login_schema.password, session)
+    user = authenticator_user(email=login_schema.email, password=login_schema.password, session=session)
+
     if not user:
         raise HTTPException(
             status_code=400, detail="User not found or invalid password."
@@ -129,7 +93,7 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
 
 
 @auth_router.get("/refresh")
-async def use_refresh_token(user: User = Depends(verify_token)):
+async def use_refresh_token(user: User = Depends(get_current_user)):
     """
     Route to create token.
     :param user: User to receive the token

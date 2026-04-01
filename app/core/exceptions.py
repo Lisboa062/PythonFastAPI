@@ -8,3 +8,7 @@ class NotAuthorizedException(Exception):
 
 class ItemNotFoundException(Exception):
     pass
+
+
+class EmailUsedException(Exception):
+    pass

@@ -19,44 +19,24 @@ def create_session():
         session.close()
 
 
-def verify_token(token: str = Depends(oauth2_schema), session: Session = Depends(create_session)):
-    """
-    Function to verify if the token sent is valid.
-    :param token: token sent to verify
-    :param session: Open a connection with DataBase
-    :return: The user that had de token verified.
-    """
-    try:
-        dic_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        user_id = int(dic_info.get("sub"))
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Access denied.")
-
-    user = session.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid access.")
-    return user
-
-
 def get_current_user(token: str = Depends(oauth2_schema), session: Session = Depends(create_session)):
     """
     Check the id of the current user authenticated.
     """
-    credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials.")
 
     try:
         dic_info = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
         user_id = dic_info.get("sub")
 
         if user_id is None:
-            raise credentials_exception
+            raise HTTPException(status_code=401, details="Invalid Authentication.")
         
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(status_code=401, details="Invalid Authentication.")
     
     user = session.query(User).filter(User.id == user_id).first()
 
     if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=401, details="User Not Found.")
     
     return user
