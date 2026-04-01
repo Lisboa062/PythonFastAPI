@@ -13,3 +13,7 @@ def create_order(session, user_id):
 def get_order_by_id(session, order_id):
     return session.query(Order).filter(Order.id==order_id).first()
 
+
+def get_orders_by_user_id(session, user_id):
+    return session.query(Order).filter(Order.user == user_id).all()
+
