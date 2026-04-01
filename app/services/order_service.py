@@ -1,13 +1,22 @@
 from app.repositories.order_repository import (create_order, 
-                                               get_order_by_id)
+                                               get_order_by_id,
+                                               get_all_orders,)
+
+from app.core.exceptions import (OrderNotFoundException, 
+                                 NotAuthorizedException,)
 
 from fastapi import HTTPException
 
 
+def validate_admin(current_user):
+    if not current_user.admin:
+        raise NotAuthorizedException()
+    return True
+
+
 def validate_order_permission(current_user, order):
     if not current_user.admin and current_user.id != order.user_id:
-        raise HTTPException(status_code=401, 
-                            detail="You are not authorized to do this modification.")
+        raise NotAuthorizedException()
 
 
 def create_order_service(session, 
@@ -29,7 +38,7 @@ def cancel_order_service(session,
     order = get_order_by_id(session=session, order_id=order_id)
 
     if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
+        raise OrderNotFoundException()
     
     validate_order_permission(current_user=current_user, order=order)
     
@@ -46,7 +55,7 @@ def finish_order_service(session,
     order = get_order_by_id(session=session, order_id=order_id)
 
     if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
+        raise OrderNotFoundException()
 
     validate_order_permission(current_user=current_user, order=order)
 
@@ -63,8 +72,16 @@ def inspect_order_service(session,
     order = get_order_by_id(session=session, order_id=order_id)
 
     if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
+        raise OrderNotFoundException()
     
     validate_order_permission(current_user=current_user, order=order)
     
     return order
+
+
+def list_orders(session,
+                current_user):
+    
+    orders = get_all_orders(session=session)
+    if validate_admin(current_user=current_user):
+        return orders
