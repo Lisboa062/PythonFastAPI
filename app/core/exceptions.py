@@ -4,3 +4,7 @@ class OrderNotFoundException(Exception):
 
 class NotAuthorizedException(Exception):
     pass
+
+
+class ItemNotFoundException(Exception):
+    pass
