@@ -16,7 +16,7 @@ def get_order_by_id(session, order_id):
 
 
 def get_orders_by_user_id(session, user_id):
-    return session.query(Order).filter(Order.user == user_id).all()
+    return session.query(Order).filter(Order.user_id == user_id).all()
 
 
 def get_all_orders(session):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
+from app.core.config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
+from app.core.security import bcrypt_context
 from app.models.models import User
 from app.dependencies import create_session, verify_token
 from app.schemas.schemas import UserSchema, LoginSchema
