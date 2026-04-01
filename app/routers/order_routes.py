@@ -6,8 +6,7 @@ from app.core.exceptions import (OrderNotFoundException,
 
 from sqlalchemy.orm import Session
 
-from app.dependencies import (create_session, 
-                              verify_token, 
+from app.dependencies import (create_session,
                               get_current_user)
 
 from app.schemas.schemas import (OrderCreate, 
@@ -34,7 +33,7 @@ from app.repositories.order_repository import (get_orders_by_user_id,)
 
 order_router = APIRouter(prefix="/orders",
                           tags=["orders"], 
-                          dependencies=[Depends(verify_token)]) #Create a route for ordering
+                          dependencies=[Depends(get_current_user)]) #Create a route for ordering
 
 
 @order_router.post("/")
@@ -62,7 +61,7 @@ async def create_order(order: OrderCreate,
 @order_router.post("/order/cancel/{id_order}")
 async def cancel_order(id_order: int, 
                        session: Session = Depends(create_session), 
-                       user: User = Depends(verify_token), ):
+                       user: User = Depends(get_current_user), ):
     """
     Route to cancel an order. Only the user owner of the order or the admin can do this.
     :param id_order: Identification of order
@@ -86,7 +85,7 @@ async def cancel_order(id_order: int,
 
 @order_router.get("/list")
 async def list_orders(session: Session = Depends(create_session), 
-                      user: User = Depends(verify_token)):
+                      user: User = Depends(get_current_user)):
     """
     Route just to list every Order listed in DataBase, Only Users Admins can do it.
     :param session: Open a connection with DataBase
@@ -105,7 +104,7 @@ async def list_orders(session: Session = Depends(create_session),
 async def add_item_order(order_id: int, 
                          item_order_schema: ItemOrderSchema, 
                          session: Session = Depends(create_session), 
-                         user: User = Depends(verify_token)):
+                         user: User = Depends(get_current_user)):
     """
     Route to Add Items to the order. Only the User Owner of the Order and Users Admin can do it.
     :param order_id: Receive the Order to add the item.
@@ -135,7 +134,7 @@ async def add_item_order(order_id: int,
 @order_router.post("/order/remove-item/{item_order_id}")
 async def remove_item_order(item_order_id: int, 
                             session: Session = Depends(create_session), 
-                            user: User = Depends(verify_token)):
+                            user: User = Depends(get_current_user)):
     """
     Route to remove an Item of the Order.
     :param item_order_id: Receive the item id that user wish to remove
@@ -162,7 +161,9 @@ async def remove_item_order(item_order_id: int,
 
 
 @order_router.post("/order/finish/{id_order}")
-async def finish_order(id_order: int, session: Session = Depends(create_session), user: User = Depends(verify_token)):
+async def finish_order(id_order: int, 
+                       session: Session = Depends(create_session), 
+                       user: User = Depends(get_current_user)):
     """
     Route to finish the order. Only user owner of the order os Admin can do this.
     :param id_order: order id to finish.
@@ -188,7 +189,7 @@ async def finish_order(id_order: int, session: Session = Depends(create_session)
 @order_router.get("/order/{id_order}")
 async def inspect_order(id_order: int, 
                         session: Session = Depends(create_session), 
-                        user: User = Depends(verify_token)):
+                        user: User = Depends(get_current_user)):
     """
     Route to inspect a determinate order.
     :param id_order: order id to inspect.
@@ -214,7 +215,7 @@ async def inspect_order(id_order: int,
 
 @order_router.get("/list-user", response_model=list[ResponseOrderSchema])
 async def list_orders(session: Session = Depends(create_session), 
-                      user: User = Depends(verify_token)):
+                      user: User = Depends(get_current_user)):
     """
     Route to list all Orders of the user authenticated.
     :param session: Open a connection with DataBase
