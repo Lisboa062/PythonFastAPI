@@ -1,8 +1,9 @@
-from app.models.models import Order
+from app.repositories.order_repository import create_order
 
-def create_order_service(session, user_id):
-    order = Order(user_id=user_id)
-    session.add(order)
-    session.commit()
-    session.refresh(order)
-    return order
+def create_order_service(session, current_user, order_data):
+    if current_user.admin and order_data.user_id:
+        user_id = order_data.user_id
+    else:
+        user_id = current_user.id
+    
+    return create_order(session, user_id)
