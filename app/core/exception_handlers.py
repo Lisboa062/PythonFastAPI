@@ -1,7 +1,10 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import EmailUsedException, OrderNotFoundException, NotAuthorizedException
+from app.core.exceptions import (EmailUsedException, 
+                                 OrderNotFoundException, 
+                                 NotAuthorizedException, 
+                                 ItemNotFoundException)
 
 
 async def email_used_exception_handler(request: Request, exc: EmailUsedException):
@@ -19,4 +22,11 @@ async def order_not_found_handler(request: Request, exc: OrderNotFoundException)
 async def not_authorized_handler(request: Request, exc: NotAuthorizedException):
     return JSONResponse(
         status_code=401,
-        content={"detail": "Not authorized."},)
+        content={"detail": "You are not authorized."},)
+
+
+async def item_not_found_handler(request: Request, exc: ItemNotFoundException):
+    return JSONResponse(
+        status_code=401,
+        content={"detail":"Item not found."}
+    )
