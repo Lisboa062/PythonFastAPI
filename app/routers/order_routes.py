@@ -4,8 +4,14 @@ from sqlalchemy.orm import Session
 from app.dependencies import create_session, verify_token, get_current_user
 from app.schemas.schemas import OrderCreate, ItemOrderSchema, ResponseOrderSchema
 from app.models.models import Order, User, ItemOrdered
-from app.services.order_service import create_order_service
-from app.repositories.order_repository import get_order_by_id
+from app.services.order_service import (create_order_service, 
+                                        cancel_order_service,
+                                        finish_order_service,
+                                        inspect_order_service,)
+
+from app.repositories.order_repository import (get_order_by_id, 
+                                               get_orders_by_user_id,)
+
 from app.repositories.item_repository import get_item_by_id
 
 
@@ -32,7 +38,8 @@ async def create_order(order: OrderCreate,
 
 
 @order_router.post("/order/cancel/{id_order}")
-async def cancel_order(id_order: int, session: Session = Depends(create_session), 
+async def cancel_order(id_order: int, 
+                       session: Session = Depends(create_session), 
                        user: User = Depends(verify_token), ):
     """
     Route to cancel an order. Only the user owner of the order or the admin can do this.
@@ -41,16 +48,10 @@ async def cancel_order(id_order: int, session: Session = Depends(create_session)
     :param user_id: Check if the user is authenticated.
     :return: Message with the order id that was canceled successfully.
     """
-    order = get_order_by_id(session=session, order_id=id_order)
+    order = cancel_order_service(session=session, 
+                                 current_user=user, 
+                                 order_id=id_order)
 
-    if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
-    
-    if not user.admin and user.id != order.user_id:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this modification.")
-    
-    order.status = "CANCELED"
-    session.commit()
     return {"mensage": f"Order number {order.id} canceled successfully.",
             "order": order
             }
@@ -151,16 +152,10 @@ async def finish_order(id_order: int, session: Session = Depends(create_session)
     :return: Message with the order id that was finished and the order itself.
     """
 
-    order = session.query(Order).filter(Order.id==id_order).first()
+    order = finish_order_service(session=session, 
+                                 current_user=user, 
+                                 order_id=id_order)
 
-    if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
-    
-    if not user.admin and user.id != order.user_id:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this modification.")
-    
-    order.status = "FINISHED"
-    session.commit()
     return{
         "mensage": f"Order number {order.id} finished successfuly.",
         "order": order
@@ -177,14 +172,11 @@ async def inspect_order(id_order: int,
     :param user: Check if the user is authenticated
     :return: Just the amount of items ordered and the order itself.
     """
-    order = session.query(Order).filter(Order.id == id_order).first()
 
-    if not order:
-        raise HTTPException(status_code=400, detail="Order not Found.")
-    
-    if not user.admin and user.id != order.user_id:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this modification.")
-    
+    order = inspect_order_service(session=session, 
+                                  order_id=id_order, 
+                                  current_user=user)
+
     return{
         "Amount of items ordered": len(order.items),
         "order": order
@@ -200,5 +192,5 @@ async def list_orders(session: Session = Depends(create_session),
     :param user: Check if the user is authenticated
     :return: All Orders
     """
-    orders = session.query(Order).filter(Order.user == user.id).all()
+    orders = get_orders_by_user_id(session=session, user_id=user.id)
     return orders
