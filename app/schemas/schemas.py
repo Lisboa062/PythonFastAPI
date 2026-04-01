@@ -44,6 +44,6 @@ class ResponseOrderSchema(BaseModel):
     id: int
     status: str
     price: float
-    Items: List[ItemOrderSchema]
+    items: List[ItemOrderSchema]
     class Config:
         from_attributes = True

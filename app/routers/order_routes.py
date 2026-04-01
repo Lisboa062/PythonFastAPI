@@ -52,9 +52,9 @@ async def create_order(order: OrderCreate,
                                         current_user = current_user, 
                                         order_data = order)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
     
     return {"message": f"Order created successfully. Order ID: {new_order.id}"}
 
@@ -75,9 +75,9 @@ async def cancel_order(id_order: int,
                                     current_user=user, 
                                     order_id=id_order)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
 
     return {"mensage": f"Order number {order.id} canceled successfully.",
             "order": order
@@ -96,7 +96,7 @@ async def list_orders(session: Session = Depends(create_session),
     try:
         orders = list_orders_admin_service(session=session, current_user=user)
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not Authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
     
     return {"orders": orders}
 
@@ -120,10 +120,10 @@ async def add_item_order(order_id: int,
                                             order_id=order_id,
                                             item_data=item_order_schema)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not Authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
 
     return {
         "mensage": "Item created successfully",
@@ -146,13 +146,13 @@ async def remove_item_order(item_order_id: int,
     try:
         order = remove_item_order_service(session=session, current_user=user, item_order_id=item_order_id)
     except ItemNotFoundException:
-        raise HTTPException(code=400, detail="Item Not Found.")
+        raise HTTPException(status_code=400, detail="Item Not Found.")
     
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
 
     return {
         "mensage": "Item removed successfully",
@@ -175,10 +175,10 @@ async def finish_order(id_order: int, session: Session = Depends(create_session)
                                     current_user=user, 
                                     order_id=id_order)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not Authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
 
     return{
         "mensage": f"Order number {order.id} finished successfuly.",
@@ -201,10 +201,10 @@ async def inspect_order(id_order: int,
                                     order_id=id_order, 
                                     current_user=user)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
     
     except NotAuthorizedException:
-        raise HTTPException(code=401, detail="You are not Authorized to do this.")
+        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
 
     return{
         "Amount of items ordered": len(order.items),
@@ -212,7 +212,7 @@ async def inspect_order(id_order: int,
     }
 
 
-@order_router.get("/list-user", response_model=ResponseOrderSchema)
+@order_router.get("/list-user", response_model=list[ResponseOrderSchema])
 async def list_orders(session: Session = Depends(create_session), 
                       user: User = Depends(verify_token)):
     """
@@ -225,6 +225,6 @@ async def list_orders(session: Session = Depends(create_session),
         orders = list_orders_service(session=session,
                                     current_user=user)
     except OrderNotFoundException:
-        raise HTTPException(code=400, detail="Order Not Found.")
+        raise HTTPException(status_code=400, detail="Order Not Found.")
 
     return orders
