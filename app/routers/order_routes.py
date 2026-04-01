@@ -1,9 +1,22 @@
-
 from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.exceptions import (OrderNotFoundException, 
+                                 NotAuthorizedException)
+
 from sqlalchemy.orm import Session
-from app.dependencies import create_session, verify_token, get_current_user
-from app.schemas.schemas import OrderCreate, ItemOrderSchema, ResponseOrderSchema
-from app.models.models import Order, User, ItemOrdered
+
+from app.dependencies import (create_session, 
+                              verify_token, 
+                              get_current_user)
+
+from app.schemas.schemas import (OrderCreate, 
+                                 ItemOrderSchema, 
+                                 ResponseOrderSchema)
+
+from app.models.models import (Order, 
+                               User, 
+                               ItemOrdered)
+
 from app.services.order_service import (create_order_service, 
                                         cancel_order_service,
                                         finish_order_service,
@@ -29,10 +42,15 @@ async def create_order(order: OrderCreate,
     :param current_user: Use the current user to create the order or if is admin choose one user.
     :return:Message with the Order ID
     """
-
-    new_order = create_order_service(session = session, 
-                                     current_user = current_user, 
-                                     order_data = order)
+    
+    try:
+        new_order = create_order_service(session = session, 
+                                        current_user = current_user, 
+                                        order_data = order)
+    except OrderNotFoundException:
+        raise HTTPException(code=400, detail="Order Not Found.")
+    except NotAuthorizedException:
+        raise HTTPException(code=401, detail="You are not authorized to do this.")
     
     return {"message": f"Order created successfully. Order ID: {new_order.id}"}
 
@@ -48,9 +66,14 @@ async def cancel_order(id_order: int,
     :param user_id: Check if the user is authenticated.
     :return: Message with the order id that was canceled successfully.
     """
-    order = cancel_order_service(session=session, 
-                                 current_user=user, 
-                                 order_id=id_order)
+    try:
+        order = cancel_order_service(session=session, 
+                                    current_user=user, 
+                                    order_id=id_order)
+    except OrderNotFoundException:
+        raise HTTPException(code=400, detail="Order Not Found.")
+    except NotAuthorizedException:
+        raise HTTPException(code=401, detail="You are not authorized to do this.")
 
     return {"mensage": f"Order number {order.id} canceled successfully.",
             "order": order
@@ -66,12 +89,12 @@ async def list_orders(session: Session = Depends(create_session),
     :param user: Check if the user is authenticated
     :return: Orders
     """
-    if not user.admin:
-        raise HTTPException(status_code=401, detail="You are not allowed to do this.")
-    else:
-        orders = session.query(Order).all()
-        return {
-            "orders": orders}
+    try:
+        orders = list_orders(session=session, current_user=user)
+    except NotAuthorizedException:
+        raise HTTPException(code=401, detail="You are not Authorized to do this.")
+    
+    return {"orders": orders}
 
 
 @order_router.post("/order/add-item/{order_id}")
