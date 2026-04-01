@@ -1,4 +1,5 @@
-from app.models.models import Order
+from app.models.models import (Order, 
+                               ItemOrdered)
                                
 
 
@@ -20,3 +21,5 @@ def get_orders_by_user_id(session, user_id):
 
 def get_all_orders(session):
     return session.query(Order).all()
+
+
