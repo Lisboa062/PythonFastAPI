@@ -1,9 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.core.exceptions import (OrderNotFoundException, 
-                                 NotAuthorizedException,
-                                 ItemNotFoundException)
-
 from sqlalchemy.orm import Session
 
 from app.dependencies import (create_session,
@@ -13,9 +9,7 @@ from app.schemas.schemas import (OrderCreate,
                                  ItemOrderSchema, 
                                  ResponseOrderSchema)
 
-from app.models.models import (Order, 
-                               User, 
-                               ItemOrdered)
+from app.models.models import User
 
 from app.services.order_service import (create_order_service, 
                                         cancel_order_service,
@@ -46,15 +40,10 @@ async def create_order(order: OrderCreate,
     :return:Message with the Order ID
     """
     
-    try:
-        new_order = create_order_service(session = session, 
+    new_order = create_order_service(session = session, 
                                         current_user = current_user, 
                                         order_data = order)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
-    
+
     return {"message": f"Order created successfully. Order ID: {new_order.id}"}
 
 
@@ -69,14 +58,9 @@ async def cancel_order(id_order: int,
     :param user_id: Check if the user is authenticated.
     :return: Message with the order id that was canceled successfully.
     """
-    try:
-        order = cancel_order_service(session=session, 
-                                    current_user=user, 
-                                    order_id=id_order)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
+    order = cancel_order_service(session=session, 
+                                current_user=user, 
+                                order_id=id_order)
 
     return {"mensage": f"Order number {order.id} canceled successfully.",
             "order": order
@@ -92,11 +76,9 @@ async def list_orders(session: Session = Depends(create_session),
     :param user: Check if the user is authenticated
     :return: Orders
     """
-    try:
-        orders = list_orders_admin_service(session=session, current_user=user)
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
-    
+
+    orders = list_orders_admin_service(session=session, current_user=user)
+
     return {"orders": orders}
 
 
@@ -113,16 +95,11 @@ async def add_item_order(order_id: int,
     :param user: Check if the user is authenticated
     :return: Message with the item id and the price of the order
     """
-    try:
-        item_ordered, order = add_item_service(session=session,
-                                            current_user=user,
-                                            order_id=order_id,
-                                            item_data=item_order_schema)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
+
+    item_ordered, order = add_item_service(session=session,
+                                        current_user=user,
+                                        order_id=order_id,
+                                        item_data=item_order_schema)
 
     return {
         "mensage": "Item created successfully",
@@ -142,16 +119,8 @@ async def remove_item_order(item_order_id: int,
     :param user: Check if the user is authenticated
     :return: Message with the Items that keep in the order and the order complete.
     """
-    try:
-        order = remove_item_order_service(session=session, current_user=user, item_order_id=item_order_id)
-    except ItemNotFoundException:
-        raise HTTPException(status_code=400, detail="Item Not Found.")
-    
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not authorized to do this.")
+  
+    order = remove_item_order_service(session=session, current_user=user, item_order_id=item_order_id)
 
     return {
         "mensage": "Item removed successfully",
@@ -171,15 +140,10 @@ async def finish_order(id_order: int,
     :param user: Check if the user is authenticated
     :return: Message with the order id that was finished and the order itself.
     """
-    try:
-        order = finish_order_service(session=session, 
+  
+    order = finish_order_service(session=session, 
                                     current_user=user, 
                                     order_id=id_order)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
 
     return{
         "mensage": f"Order number {order.id} finished successfuly.",
@@ -197,15 +161,10 @@ async def inspect_order(id_order: int,
     :param user: Check if the user is authenticated
     :return: Just the amount of items ordered and the order itself.
     """
-    try:
-        order = inspect_order_service(session=session, 
+
+    order = inspect_order_service(session=session, 
                                     order_id=id_order, 
                                     current_user=user)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
-    
-    except NotAuthorizedException:
-        raise HTTPException(status_code=401, detail="You are not Authorized to do this.")
 
     return{
         "Amount of items ordered": len(order.items),
@@ -222,10 +181,8 @@ async def list_orders(session: Session = Depends(create_session),
     :param user: Check if the user is authenticated
     :return: All Orders
     """
-    try:
-        orders = list_orders_service(session=session,
+
+    orders = list_orders_service(session=session,
                                     current_user=user)
-    except OrderNotFoundException:
-        raise HTTPException(status_code=400, detail="Order Not Found.")
 
     return orders

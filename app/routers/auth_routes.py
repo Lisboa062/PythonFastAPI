@@ -8,7 +8,6 @@ from app.services.auth_service import (authenticator_user,
                                        create_access_token,
                                        create_refresh_token)
 
-from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 
 auth_router = APIRouter(
@@ -25,10 +24,8 @@ async def create_account(user_schema: UserSchema, session=Depends(create_session
     :param session: Open a connection with DataBase
     :return: Message that the user was registered.
     """
-    try:
-        new_user = create_account_service(user_schema=user_schema, session=session)
-    except EmailUsedException:
-        raise HTTPException(status_code=400, details="Email already registered.")
+  
+    new_user = create_account_service(user_schema=user_schema, session=session)
 
     return {"message": f"user {new_user.email} successfully registered."}
 
@@ -74,7 +71,7 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
         )
 
     access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id, token_time=timedelta(days=7))
+    refresh_token = create_refresh_token(user.id)
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
