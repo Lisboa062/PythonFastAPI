@@ -24,19 +24,48 @@ def get_current_user(token: str = Depends(oauth2_schema), session: Session = Dep
     Check the id of the current user authenticated.
     """
 
-    try:
-        dic_info = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
-        user_id = dic_info.get("sub")
+    dic_info = get_token_dic(token=token)
 
-        if user_id is None:
-            raise HTTPException(status_code=401, details="Invalid Authentication.")
-        
-    except JWTError:
-        raise HTTPException(status_code=401, details="Invalid Authentication.")
+    user_id = dic_info.get("sub")
+    token_type = dic_info.get("type")
+
+
+    if user_id is None or token_type != "access":
+        raise HTTPException(status_code=401, details="Invalid Access Token.")
     
     user = session.query(User).filter(User.id == user_id).first()
 
-    if user is None:
+    if not user:
         raise HTTPException(status_code=401, details="User Not Found.")
     
     return user
+
+
+def get_current_refresh_user(token: str = Depends(oauth2_schema), session: Session = Depends(create_session)):
+    """
+    Check the id of the current user authenticated.
+    """
+
+    dic_info = get_token_dic(token=token)
+
+    user_id = dic_info.get("sub")
+    token_type = dic_info.get("type")
+
+
+    if user_id is None or token_type != "refresh":
+        raise HTTPException(status_code=401, details="Invalid Refresh Token.")
+    
+    user = session.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=401, details="User Not Found.")
+    
+    return user
+
+
+def get_token_dic(token:str):
+    try:
+        dic_info = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+        return dic_info
+    except JWTError:
+        raise HTTPException(status_code=401, details="Invalid Authentication.")

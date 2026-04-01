@@ -1,32 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
-
-from app.core.config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
-from app.core.security import bcrypt_context
+from app.core.exceptions import EmailUsedException
 from app.models.models import User
-from app.dependencies import create_session, get_current_user
+from app.dependencies import create_session, get_current_refresh_user
 from app.schemas.schemas import UserSchema, LoginSchema
 from app.services.auth_service import (authenticator_user, 
-                                       create_account_service)
-from jose import jwt
-from datetime import datetime, timedelta, timezone
+                                       create_account_service,
+                                       create_access_token,
+                                       create_refresh_token)
+
+from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 
 auth_router = APIRouter(
     prefix="/auth", tags=["auth"]
 )  # Create a route for authentication
 
-
-def create_token(user_id, token_time=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
-    """
-    Function to create encoded tokens based on the user id and time of expiration. Token standard JWT.
-    :param user_id: user owner of token
-    :param token_time: time of expiration of token.
-    :return: encode token
-    """
-    expiration_date = datetime.now(timezone.utc) + token_time
-    dic_info = {"sub": str(user_id), "exp": expiration_date}
-    encode_jwt = jwt.encode(dic_info, SECRET_KEY, algorithm=ALGORITHM)
-    return encode_jwt
 
 
 @auth_router.post("/create_account")
@@ -37,8 +25,10 @@ async def create_account(user_schema: UserSchema, session=Depends(create_session
     :param session: Open a connection with DataBase
     :return: Message that the user was registered.
     """
-
-    new_user = create_account_service(user_schema=user_schema, session=session)
+    try:
+        new_user = create_account_service(user_schema=user_schema, session=session)
+    except EmailUsedException:
+        raise HTTPException(status_code=400, details="Email already registered.")
 
     return {"message": f"user {new_user.email} successfully registered."}
 
@@ -63,7 +53,7 @@ async def login_form(
             status_code=400, detail="User not found or invalid password."
         )
 
-    access_token = create_token(user.id)
+    access_token = create_access_token(user.id)
     return {"access_token": access_token, "token_type": "Bearer"}
 
 
@@ -83,8 +73,8 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
             status_code=400, detail="User not found or invalid password."
         )
 
-    access_token = create_token(user.id)
-    refresh_token = create_token(user.id, token_time=timedelta(days=7))
+    access_token = create_access_token(user.id)
+    refresh_token = create_refresh_token(user.id, token_time=timedelta(days=7))
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -93,12 +83,12 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
 
 
 @auth_router.get("/refresh")
-async def use_refresh_token(user: User = Depends(get_current_user)):
+async def use_refresh_token(user: User = Depends(get_current_refresh_user)):
     """
     Route to create token.
     :param user: User to receive the token
     :return: access token
     """
 
-    access_token = create_token(user.id)
+    access_token = create_access_token(user.id)
     return {"access_token": access_token, "token_type": "Bearer"}
