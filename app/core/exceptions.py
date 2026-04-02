@@ -14,5 +14,5 @@ class EmailUsedException(Exception):
     pass
 
 
-class InvalidCredentialsExceptions(Exception):
+class InvalidCredentialsException(Exception):
     pass
