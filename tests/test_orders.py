@@ -97,3 +97,58 @@ def test_add_item_to_order(client):
     assert body["Amount of items ordered"] == 1
 
 
+def test_remove_item_not_found(client):
+    token = create_user_and_get_token(client)
+    
+    response = client.post(f"/orders/order/remove-item/999",
+                             headers={"Authorization": f"Bearer {token}"})
+    
+    assert response.status_code == 404
+
+
+def test_finish_order(client):
+    token = create_user_and_get_token(client)
+    order_id = create_order_and_get_id(client, token=token)
+
+    response = client.post(f"/orders/order/finish/{order_id}",
+                           headers={"Authorization": f"Bearer {token}"})
+    
+    assert response.status_code == 200
+
+    inspect_response = client.get(f"/orders/order/{order_id}",
+                                  headers={"Authorization": f"Bearer {token}"})
+    
+    body = inspect_response.json()
+
+    assert inspect_response.status_code == 200
+    assert body["order"]["status"] == "FINISHED"
+
+
+def test_cancel_order(client):
+    token = create_user_and_get_token(client)
+    order_id = create_order_and_get_id(client, token=token)
+
+    response = client.post(f"/orders/order/cancel/{order_id}",
+                           headers={"Authorization": f"Bearer {token}"})
+    
+    assert response.status_code == 200
+
+    inspect_response = client.get(f"/orders/order/{order_id}",
+                                  headers={"Authorization": f"Bearer {token}"})
+    
+    body = inspect_response.json()
+
+    assert inspect_response.status_code == 200
+    assert body["order"]["status"] == "CANCELED"
+
+
+def test_user_cannot_finish_other_user_order(client):
+    token_user_1 = create_user_and_get_token(client, email="user1.com")
+    order_id = create_order_and_get_id(client, token=token_user_1)
+
+    token_user_2 = create_user_and_get_token(client, email="user2.com")
+
+    response = client.post(f"/orders/order/finish/{order_id}",
+                           headers={"Authorization": f"Bearer {token_user_2}"})
+    
+    assert response.status_code == 403

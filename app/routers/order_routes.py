@@ -62,7 +62,7 @@ async def cancel_order(id_order: int,
                                 current_user=user, 
                                 order_id=id_order)
 
-    return {"mensage": f"Order number {order.id} canceled successfully.",
+    return {"message": f"Order number {order.id} canceled successfully.",
             "order": order
             }
 
@@ -123,7 +123,7 @@ async def remove_item_order(item_order_id: int,
     order = remove_item_order_service(session=session, current_user=user, item_order_id=item_order_id)
 
     return {
-        "mensage": "Item removed successfully",
+        "message": "Item removed successfully",
         "items_order": order.items,
         "Order": order
     }
@@ -146,7 +146,7 @@ async def finish_order(id_order: int,
                                     order_id=id_order)
 
     return{
-        "mensage": f"Order number {order.id} finished successfuly.",
+        "message": f"Order number {order.id} finished successfuly.",
         "order": order
     }
 
