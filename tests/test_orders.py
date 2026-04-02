@@ -17,6 +17,16 @@ def create_user_and_get_token(client, email="user.com", password="123456", admin
     return response.json()["access_token"]
 
 
+def create_order_and_get_id(client, token):
+    response = client.post("/orders/",
+                           json={},
+                           headers={"Authorization": f"Bearer {token}"})
+
+    message = response.json()["message"]
+    order_id = int(message.split(":")[-1].strip())
+    return order_id
+
+
 def test_create_order(client):
     token = create_user_and_get_token(client)
 
@@ -61,4 +71,29 @@ def test_user_cannot_access_other_user_order(client):
                           headers={"Authorization": f"Bearer {token_user_2}"})
     
     assert response.status_code == 403
+
+
+def test_add_item_to_order(client):
+    token = create_user_and_get_token(client)
+    order_id = create_order_and_get_id(client, token=token)
+
+    response = client.post(f"/orders/order/add-item/{order_id}",
+                           json={
+                               "amount": 2,
+                               "flavor": "flavor",
+                               "size": "big",
+                               "unit_price": 25,
+                           },
+                           headers={"Authorization": f"Bearer {token}"})
+    
+    inspect_response = client.get(f"/orders/order/{order_id}",
+                                  headers={"Authorization": f"Bearer {token}"})
+    body = inspect_response.json()
+
+
+    assert response.status_code == 200
+    assert "Item created successfully" in response.json()["message"]
+    assert inspect_response.status_code == 200
+    assert body["Amount of items ordered"] == 1
+
 

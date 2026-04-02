@@ -102,7 +102,7 @@ async def add_item_order(order_id: int,
                                         item_data=item_order_schema)
 
     return {
-        "mensage": "Item created successfully",
+        "message": "Item created successfully",
         "item_id": item_ordered.id,
         "price_ordered": order.price
     }
