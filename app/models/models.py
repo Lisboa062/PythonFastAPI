@@ -9,8 +9,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship
 
+from app.core.config import DATABASE_URL
+
 # Creating connection with Data Base
-db = create_engine("sqlite:///banco.db")
+db = create_engine(DATABASE_URL)
 
 # creating the Base of the Data Base
 Base = declarative_base()
