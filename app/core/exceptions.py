@@ -12,3 +12,7 @@ class ItemNotFoundException(Exception):
 
 class EmailUsedException(Exception):
     pass
+
+
+class InvalidCredentialsExceptions(Exception):
+    pass

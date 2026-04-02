@@ -45,11 +45,6 @@ async def login_form(
 
     user = authenticator_user(email=formulary_data.username, password=formulary_data.password, session=session)
 
-    if not user:
-        raise HTTPException(
-            status_code=400, detail="User not found or invalid password."
-        )
-
     access_token = create_access_token(user.id)
     return {"access_token": access_token, "token_type": "Bearer"}
 
@@ -64,11 +59,6 @@ async def login(login_schema: LoginSchema, session=Depends(create_session)):
     """
 
     user = authenticator_user(email=login_schema.email, password=login_schema.password, session=session)
-
-    if not user:
-        raise HTTPException(
-            status_code=400, detail="User not found or invalid password."
-        )
 
     access_token = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)

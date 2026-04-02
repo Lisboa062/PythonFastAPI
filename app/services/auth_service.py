@@ -2,7 +2,7 @@ from app.models.models import User
 from app.schemas.schemas import UserSchema
 from sqlalchemy.orm import Session
 from app.core.security import bcrypt_context
-from app.core.exceptions import EmailUsedException
+from app.core.exceptions import EmailUsedException, InvalidCredentialsExceptions
 from app.repositories.auth_repository import (get_user_by_email, 
                                               create_user)
 from app.core.config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
@@ -20,9 +20,9 @@ def authenticator_user(email, password, session):
     """
     user = session.query(User).filter(User.email == email).first()
     if not user:
-        return None
+        raise InvalidCredentialsExceptions()
     elif not bcrypt_context.verify(password, user.password):
-        return None
+        raise InvalidCredentialsExceptions()
     else:
         return user
     
