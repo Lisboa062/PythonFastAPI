@@ -100,7 +100,7 @@ def test_add_item_to_order(client):
 def test_remove_item_not_found(client):
     token = create_user_and_get_token(client)
     
-    response = client.post(f"/orders/order/remove-item/999",
+    response = client.post("/orders/order/remove-item/999",
                              headers={"Authorization": f"Bearer {token}"})
     
     assert response.status_code == 404

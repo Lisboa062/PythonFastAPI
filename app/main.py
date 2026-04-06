@@ -6,6 +6,9 @@ from app.core.exception_handlers import (
     item_not_found_handler,
     invalid_credentials_handler)
 
+from app.routers.auth_routes import auth_router
+from app.routers.order_routes import order_router
+
 from app.core.exceptions import (
     EmailUsedException,
     OrderNotFoundException,
@@ -14,10 +17,6 @@ from app.core.exceptions import (
     InvalidCredentialsException)
 
 app = FastAPI()
-
-
-from app.routers.auth_routes import auth_router
-from app.routers.order_routes import order_router
 
 app.add_exception_handler(EmailUsedException, email_used_exception_handler)
 app.add_exception_handler(OrderNotFoundException, order_not_found_handler)

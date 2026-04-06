@@ -1,5 +1,4 @@
-from app.models.models import (Order, 
-                               ItemOrdered)
+from app.models.models import (Order)
                                
 
 

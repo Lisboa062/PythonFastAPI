@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.core.exceptions import EmailUsedException
+from fastapi import APIRouter, Depends
 from app.models.models import User
 from app.dependencies import create_session, get_current_refresh_user
 from app.schemas.schemas import UserSchema, LoginSchema
