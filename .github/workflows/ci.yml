@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PYTHONPATH: .
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       SECRET_KEY: test_secret_key
       ALGORITHM: HS256
