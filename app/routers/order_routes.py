@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +20,6 @@ from app.services.order_service import (create_order_service,
                                         add_item_service,
                                         remove_item_order_service)
 
-from app.repositories.order_repository import (get_orders_by_user_id,)
 
 
 
@@ -68,7 +67,7 @@ async def cancel_order(id_order: int,
 
 
 @order_router.get("/list")
-async def list_orders(session: Session = Depends(create_session), 
+async def list_orders_admin(session: Session = Depends(create_session), 
                       user: User = Depends(get_current_user)):
     """
     Route just to list every Order listed in DataBase, Only Users Admins can do it.

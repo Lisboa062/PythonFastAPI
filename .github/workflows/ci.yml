@@ -48,8 +48,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Rodar migrations
+      - name: Run migrations
         run: alembic upgrade head
 
-      - name: Rodar testes
+      - name: Run lint (Ruff)
+        run: ruff check .
+
+      - name: Run tests
         run: pytest -v
