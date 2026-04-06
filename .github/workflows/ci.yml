@@ -1,0 +1,12 @@
+name: CI - Teste inicial
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Exibir mensagem
+        run: echo "CI funcionando"

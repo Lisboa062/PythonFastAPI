@@ -84,24 +84,24 @@ git clone https://github.com/Lisboa062/PythonFastAPI.git
 cd PythonFastAPI
 
 
-## 2. Create `.env` file
+### 2. Create `.env` file
 
 DATABASE_URL=postgresql://postgres:postgres@db:5432/pythonfastapi
 SECRET_KEY=your_secret_key_here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-👉 Recommended: create a `.env` file based on `.env.example`
+Recommended: create a `.env` file based on `.env.example`
 
 ---
 
-## 3. Start the environment
+### 3. Start the environment
 
 docker compose up -d --build
 
 ---
 
-## 4. Access the API
+### 4. Access the API
 
 http://localhost:8000/docs
 
