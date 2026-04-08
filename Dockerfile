@@ -12,4 +12,4 @@ RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["sh", "./entrypoint.sh"]
+ENTRYPOINT ["sh", "./entrypoint.sh"]
