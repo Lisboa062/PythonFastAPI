@@ -16,7 +16,14 @@ from app.core.exceptions import (
     ItemNotFoundException,
     InvalidCredentialsException)
 
+
 app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return {"message": "FastAPI Orders API is running"}
+
 
 app.add_exception_handler(EmailUsedException, email_used_exception_handler)
 app.add_exception_handler(OrderNotFoundException, order_not_found_handler)
