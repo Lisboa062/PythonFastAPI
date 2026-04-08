@@ -1,8 +1,8 @@
-# PythonFastAPI
+# FastAPI Orders API
 
 [![CI - Initial Testing](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml)
 
-A backend API built with **FastAPI**, following clean architecture principles and featuring JWT authentication, automated testing, and a fully containerized environment with Docker.
+A production ready backend API built with **FastAPI**, following clean architecture principles and featuring JWT authentication, automated testing, and a fully containerized environment with Docker.
 
 ---
 
@@ -16,6 +16,23 @@ This project is a backend API for user authentication and order management, desi
 - Automated testing  
 - Reproducible environment with Docker  
 - PostgreSQL database with schema control via Alembic  
+
+---
+
+## Live API
+
+- Base URL: https://fastapi-orders-api.onrender.com
+- Swagger Docs: https://fastapi-orders-api.onrender.com/docs
+
+---
+
+## Deployment
+
+This application is deployed on Render using:
+
+- Docker based deployment
+- Managed PostgreSQL database
+- Environment variables for configuration
 
 ---
 
@@ -93,7 +110,7 @@ The CI pipeline includes:
 - Setting up a clean Python environment  
 - Spinning up a PostgreSQL service  
 - Applying database migrations with Alembic  
-- Running automated tests with Pytest  
+- Running automated tests with Pytest and coverage reporting  
 
 This ensures that the application is always in a working state and prevents regressions.
 
@@ -202,10 +219,9 @@ SECRET_KEY=your_secret_key
 
 ## Future improvements
 
-- Test coverage reporting (pytest-cov)  
+- Improve test coverage and maintainability  
 - Code quality tools (linting with Ruff / formatting)  
-- Logging and observability improvements  
-- Cloud deployment (AWS, GCP, or similar)  
+- Logging and observability improvements
 
 ---
 
@@ -220,4 +236,4 @@ Developed by **Wagner Lisboa**
 
 ## Final notes
 
-This project was built with the goal of applying modern backend development practices, aiming to simulate a production-ready environment.
+This project was built with the goal of applying modern backend development practices, aiming to simulate a production ready environment.
