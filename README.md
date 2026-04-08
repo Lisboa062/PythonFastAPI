@@ -1,6 +1,6 @@
 # PythonFastAPI
 
-[![CI - Teste inicial](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml)
+[![CI - Initial Testing](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lisboa062/PythonFastAPI/actions/workflows/ci.yml)
 
 A backend API built with **FastAPI**, following clean architecture principles and featuring JWT authentication, automated testing, and a fully containerized environment with Docker.
 
